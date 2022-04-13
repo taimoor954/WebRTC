@@ -16,10 +16,12 @@ const PORT = process.env.PORT || 5001;
 app.get('/', (req, res) => {
 	res.send('Running');
 });
-
+/**
+ * Once we connected we will emit me
+ */
 io.on("connection", (socket) => {
 	socket.emit("me", socket.id);
-
+	
 	socket.on("disconnect", () => {
 		socket.broadcast.emit("callEnded")
 	});

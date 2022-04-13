@@ -1,11 +1,12 @@
+/* eslint-disable */
 import React, { createContext, useState, useRef, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import Peer from 'simple-peer';
 
 const SocketContext = createContext();
 
-const socket = io('http://localhost:5001');
-// const socket = io('https://warm-wildwood-81069.herokuapp.com');
+// const socket = io('http://localhost:5001');
+const socket = io('https://warm-wildwood-81069.herokuapp.com');
 
 const ContextProvider = ({ children }) => {
   const [callAccepted, setCallAccepted] = useState(false);
@@ -38,7 +39,15 @@ const ContextProvider = ({ children }) => {
   const answerCall = () => {
     setCallAccepted(true);
 
-    const peer = new Peer({ initiator: false, trickle: false, stream });
+    const peer = new Peer({
+      initiator: false, trickle: false, stream, config: {
+        iceServers: [{
+          urls: "turn:numb.viagenie.ca",
+          credential: "muazkh",
+          username: "webrtc@live.com",
+        }]
+      }
+    });
 
     peer.on('signal', (data) => {
       socket.emit('answerCall', { signal: data, to: call.from });
@@ -59,6 +68,8 @@ const ContextProvider = ({ children }) => {
     peer.on('signal', (data) => {
       socket.emit('callUser', { userToCall: id, signalData: data, from: me, name });
     });
+
+    
 
     peer.on('stream', (currentStream) => {
       userVideo.current.srcObject = currentStream;
